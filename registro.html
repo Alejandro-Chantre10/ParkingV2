@@ -68,6 +68,7 @@
             // Disable button while processing
             submitBtn.disabled = true;
             submitBtn.textContent = 'Registrando...';
+            errorDiv.style.display = 'none';
             
             try {
                 const result = await AuthAPI.register(fullName, email, password, phone);
