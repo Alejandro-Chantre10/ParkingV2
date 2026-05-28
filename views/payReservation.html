@@ -21,18 +21,9 @@
             background-color: #5c6bc0;
             color: white;
         }
-        .payment-method-btn:hover {
-            border-color: #5c6bc0;
-        }
-        .success-message {
-            text-align: center;
-            padding: 40px;
-            display: none;
-        }
-        .success-message h3 {
-            color: #2e7d32;
-            margin-bottom: 15px;
-        }
+        .payment-method-btn:hover { border-color: #5c6bc0; }
+        .success-message { text-align: center; padding: 40px; display: none; }
+        .success-message h3 { color: #2e7d32; margin-bottom: 15px; }
         .reference-code {
             background: #f5f5f5;
             padding: 15px;
@@ -62,7 +53,7 @@
                 <h2>PAGO</h2>
                 <button class="close-btn" onclick="window.location.href='seeReservation.html'">X</button>
             </div>
-            
+
             <div id="paymentForm">
                 <form>
                     <label>Numero de reserva</label>
@@ -94,7 +85,7 @@
 
                     <button type="button" class="save-btn" id="payBtn" onclick="processPayment()">Pagar Ahora</button>
                 </form>
-                <div id="errorMessage" style="display: none; color: red; margin-top: 10px; text-align: center;"></div>
+                <div id="errorMessage" style="display:none;color:red;margin-top:10px;text-align:center;"></div>
             </div>
 
             <div id="successMessage" class="success-message">
@@ -112,44 +103,41 @@
     <script src="../js/api.js"></script>
     <script>
         let currentReservationId = null;
-        let currentPaymentId = null;
+        let currentPaymentId     = null;
 
-        // Load reservation details on page load
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
-            
-            // Get reservation ID from URL
+
             const urlParams = new URLSearchParams(window.location.search);
             currentReservationId = urlParams.get('id');
-            const priceFromUrl = urlParams.get('price');
-            
+            const priceFromUrl   = urlParams.get('price');
+
             if (!currentReservationId) {
                 showNotification('Reserva no especificada', 'error');
                 window.location.href = 'seeReservation.html';
                 return;
             }
-            
+
             await loadReservationDetails(currentReservationId, priceFromUrl);
         });
 
-        // Load reservation details
         async function loadReservationDetails(id, priceFromUrl) {
             try {
                 const result = await ReservationsAPI.getById(id);
-                
+
                 if (result.success && result.reservation) {
                     const r = result.reservation;
-                    
-                    document.getElementById('reservationId').value = String(r.id_reservations).padStart(6, '0');
-                    document.getElementById('vehiclePlate').value = r.vehicle_plate;
-                    document.getElementById('startAt').value = formatDateTime(r.start_at);
-                    document.getElementById('endAt').value = formatDateTime(r.end_at);
-                    document.getElementById('vehicleType').value = r.vehicle_type_name;
-                    document.getElementById('totalPrice').textContent = formatCurrency(r.price || priceFromUrl);
-                    
-                    // Check if reservation is already paid
+
+                    // Schema uses 'id' as PK
+                    document.getElementById('reservationId').value = String(r.id).padStart(6, '0');
+                    document.getElementById('vehiclePlate').value  = r.vehicle_plate;
+                    document.getElementById('startAt').value       = formatDateTime(r.start_at);
+                    document.getElementById('endAt').value         = formatDateTime(r.end_at);
+                    document.getElementById('vehicleType').value   = r.vehicle_type_name;
+                    document.getElementById('totalPrice').textContent = formatCurrency(r.price || priceFromUrl || 0);
+
                     if (r.status !== 'PENDING') {
-                        document.getElementById('payBtn').disabled = true;
+                        document.getElementById('payBtn').disabled    = true;
                         document.getElementById('payBtn').textContent = 'Reserva ya procesada';
                         document.getElementById('payBtn').style.backgroundColor = '#999';
                     }
@@ -162,50 +150,42 @@
             }
         }
 
-        // Select payment method
         function selectPaymentMethod(method, button) {
-            // Remove selected class from all buttons
             document.querySelectorAll('.payment-method-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
-            
-            // Add selected class to clicked button
             button.classList.add('selected');
             document.getElementById('selectedMethod').value = method;
         }
 
-        // Process payment
         async function processPayment() {
-            const method = document.getElementById('selectedMethod').value;
+            const method   = document.getElementById('selectedMethod').value;
             const errorDiv = document.getElementById('errorMessage');
-            const payBtn = document.getElementById('payBtn');
-            
+            const payBtn   = document.getElementById('payBtn');
+
             if (!method) {
                 errorDiv.textContent = 'Por favor selecciona un metodo de pago';
                 errorDiv.style.display = 'block';
                 return;
             }
-            
-            payBtn.disabled = true;
+
+            payBtn.disabled    = true;
             payBtn.textContent = 'Procesando...';
             errorDiv.style.display = 'none';
-            
+
             try {
-                // Create payment
                 const createResult = await PaymentsAPI.create(currentReservationId, method);
-                
+
                 if (!createResult.success) {
                     throw new Error(createResult.message || 'Error al crear el pago');
                 }
-                
+
                 currentPaymentId = createResult.payment_id;
-                
-                // Process payment
+
                 const processResult = await PaymentsAPI.process(currentPaymentId);
-                
+
                 if (processResult.success) {
-                    // Show success message
-                    document.getElementById('paymentForm').style.display = 'none';
+                    document.getElementById('paymentForm').style.display    = 'none';
                     document.getElementById('successMessage').style.display = 'block';
                     document.getElementById('paymentReference').textContent = processResult.reference;
                 } else {
@@ -214,7 +194,7 @@
             } catch (error) {
                 errorDiv.textContent = error.message || 'Error de conexion';
                 errorDiv.style.display = 'block';
-                payBtn.disabled = false;
+                payBtn.disabled    = false;
                 payBtn.textContent = 'Pagar Ahora';
             }
         }

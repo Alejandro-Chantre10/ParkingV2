@@ -1,31 +1,23 @@
 /**
  * API Client - Parking The Beasts
- * Handles all API calls to the PHP backend
+ * Fixed: UsersAPI.updateProfile uses full_name; reservation IDs use 'id' not 'id_reservations'
  */
 
-// Detect if we're in a subdirectory (views) or root
 function getApiBaseUrl() {
     const path = window.location.pathname;
-    
-    // Check if we're inside /views/ folder
     if (path.includes('/views/')) {
-        return '../api';  // Go up one level from views to api
+        return '../api';
     }
-    
-    // We're in the root of the project
-    return './api';  // api folder is in the same directory
+    return './api';
 }
 
 const API_BASE_URL = getApiBaseUrl();
 
-// Generic API request function
 async function apiRequest(endpoint, method = 'GET', data = null) {
     const config = {
         method,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        credentials: 'include' // Include cookies for session
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
     };
 
     if (data && method !== 'GET') {
@@ -36,8 +28,7 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
         const url = `${API_BASE_URL}${endpoint}`;
         const response = await fetch(url, config);
         const text = await response.text();
-        
-        // Try to parse as JSON
+
         let result;
         try {
             result = JSON.parse(text);
@@ -45,11 +36,11 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
             console.error('Response is not JSON:', text.substring(0, 200));
             throw new Error('El servidor devolvió una respuesta inválida. Verifica que PHP esté funcionando correctamente.');
         }
-        
+
         if (!response.ok) {
             throw new Error(result.message || 'Error en la solicitud');
         }
-        
+
         return result;
     } catch (error) {
         console.error('API Error:', error);
@@ -93,8 +84,13 @@ const UsersAPI = {
         return apiRequest('/users.php?action=profile', 'GET');
     },
 
-    async updateProfile(fullName, phone) {
-        return apiRequest('/users.php?action=profile', 'PUT', { full_name: fullName, phone });
+    // Fixed: backend expects full_name, not first_name/last_name
+    async updateProfile(data) {
+        const payload = {
+            full_name: data.full_name || `${data.first_name || ''} ${data.last_name || ''}`.trim(),
+            phone: data.phone || null
+        };
+        return apiRequest('/users.php?action=profile', 'PUT', payload);
     },
 
     async updatePassword(currentPassword, newPassword) {
@@ -163,10 +159,10 @@ const ReservationsAPI = {
 
     async getAll(limit = 50, offset = 0, filters = {}) {
         let url = `/reservations.php?action=all&limit=${limit}&offset=${offset}`;
-        if (filters.status) url += `&status=${filters.status}`;
+        if (filters.status)     url += `&status=${filters.status}`;
         if (filters.facilityId) url += `&facility_id=${filters.facilityId}`;
-        if (filters.dateFrom) url += `&date_from=${filters.dateFrom}`;
-        if (filters.dateTo) url += `&date_to=${filters.dateTo}`;
+        if (filters.dateFrom)   url += `&date_from=${filters.dateFrom}`;
+        if (filters.dateTo)     url += `&date_to=${filters.dateTo}`;
         return apiRequest(url, 'GET');
     }
 };
@@ -284,38 +280,31 @@ const PQRAPI = {
 // UTILITY FUNCTIONS
 // ==========================================
 
-// Store user data in localStorage
 function storeUserSession(user) {
     localStorage.setItem('user', JSON.stringify(user));
 }
 
-// Get user data from localStorage
 function getUserSession() {
     const user = localStorage.getItem('user');
     return user ? JSON.parse(user) : null;
 }
 
-// Alias for getUserSession
 function getCurrentUser() {
     return getUserSession();
 }
 
-// Clear user session
 function clearUserSession() {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
 }
 
-// Check if user is logged in
 function isLoggedIn() {
     return getUserSession() !== null;
 }
 
-// Redirect to login if not authenticated
 function requireLogin() {
     if (!isLoggedIn()) {
         const path = window.location.pathname;
-        // Check if we're inside /views/ folder
         if (path.includes('/views/')) {
             window.location.href = '../inicioSesion.html';
         } else {
@@ -326,7 +315,6 @@ function requireLogin() {
     return true;
 }
 
-// Format currency (COP)
 function formatCurrency(amount) {
     return new Intl.NumberFormat('es-CO', {
         style: 'currency',
@@ -335,7 +323,6 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Format date
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('es-CO', {
@@ -345,7 +332,6 @@ function formatDate(dateString) {
     });
 }
 
-// Format time
 function formatTime(dateString) {
     const date = new Date(dateString);
     return date.toLocaleTimeString('es-CO', {
@@ -354,22 +340,18 @@ function formatTime(dateString) {
     });
 }
 
-// Format datetime
 function formatDateTime(dateString) {
     return `${formatDate(dateString)} ${formatTime(dateString)}`;
 }
 
-// Show notification/alert
 function showNotification(message, type = 'info') {
-    // Create notification element
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.innerHTML = `
         <span>${message}</span>
         <button onclick="this.parentElement.remove()">&times;</button>
     `;
-    
-    // Add styles if not already added
+
     if (!document.getElementById('notification-styles')) {
         const styles = document.createElement('style');
         styles.id = 'notification-styles';
@@ -388,8 +370,8 @@ function showNotification(message, type = 'info') {
                 animation: slideIn 0.3s ease;
             }
             .notification-success { background-color: #4CAF50; }
-            .notification-error { background-color: #f44336; }
-            .notification-info { background-color: #2196F3; }
+            .notification-error   { background-color: #f44336; }
+            .notification-info    { background-color: #2196F3; }
             .notification-warning { background-color: #ff9800; }
             .notification button {
                 background: none;
@@ -400,28 +382,20 @@ function showNotification(message, type = 'info') {
             }
             @keyframes slideIn {
                 from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+                to   { transform: translateX(0);    opacity: 1; }
             }
         `;
         document.head.appendChild(styles);
     }
-    
+
     document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
     setTimeout(() => notification.remove(), 5000);
 }
 
-// Export for use in modules (if needed)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        AuthAPI,
-        UsersAPI,
-        ReservationsAPI,
-        PaymentsAPI,
-        RatesAPI,
-        VehicleTypesAPI,
-        FacilitiesAPI,
-        PQRAPI
+        AuthAPI, UsersAPI, ReservationsAPI,
+        PaymentsAPI, RatesAPI, VehicleTypesAPI,
+        FacilitiesAPI, PQRAPI
     };
 }

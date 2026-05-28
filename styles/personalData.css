@@ -3,15 +3,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Hammersmith+One&family=Klee+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Khmer&display=swap" rel="stylesheet');
+@import url('https://fonts.googleapis.com/css2?family=Khmer&display=swap');
 
 /* styles.css */
 body {
     margin: 0;
     background: #d3d8eb; /* Color de fondo similar a la imagen */
     display: flex;
+    min-height: 100vh;
 }
-
 
 .main-content {
     flex: 1;
@@ -19,19 +19,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 40px 20px;
 }
 
 .profile-container {
     color: #D9D9D9;
-    margin-top: -15px;
     text-align: center;
-    padding: 30px;
+    padding: 10px;
 }
 
-/* Fondo circular agregado */
+/* Fondo circular corregido a dimensiones perfectas */
 .profile-image-wrapper {
-    width: 190px;
-    height: 170px;
+    width: 160px;
+    height: 160px;
     background-color: #e1e1e1;
     border-radius: 50%;
     display: flex;
@@ -39,71 +39,122 @@ body {
     justify-content: center;
     margin: 0 auto 20px auto;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    margin-top: 10;
 }
 
 .profile-image {
-
-    overflow: hidden;
     width: 50%;
-    height: 60%;
-    object-fit: cover;
+    height: 55%;
+    object-fit: contain;
 }
 
 .profile-name {
-    font-family:'Love Ya Like A Sister', cursive;
+    font-family: 'Love Ya Like A Sister', cursive;
     color: #2A2954;
-    font-size: 30px;
-    margin-bottom: 10px;
-
+    font-size: 32px;
+    margin-bottom: 20px;
 }
 
-.profile-email {
-    font-family:'Love Ya Like A Sister', cursive;
-    color: #2A2954;
-    font-size: 30px;
-    margin-bottom: 30px;
-}
-
+/* Contenedor adaptativo sin altura fija para evitar desbordes */
 .form-container {
     background-color: #D9D9D9;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    height: 400px;
+    padding: 30px 25px;
+    border-radius: 15px;
+    width: 420px;
+    height: auto; /* Permite que crezca orgánicamente con los botones */
     margin: 0 auto;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .form-group {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 18px;
+    text-align: left; /* Alinea los labels a la izquierda dentro del formulario */
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    color: #000;
-    font-family: 'klee one'
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #4a4a4a;
+    font-family: 'Klee One', sans-serif;
+    font-size: 14px;
 }
 
+/* Incluido input[type="email"] para unificar la interfaz */
 input[type="password"],
-input[type="text"] {
+input[type="text"],
+input[type="email"] {
     background-color: #C4C7CF;
     width: 100%;
-    padding: 10px 40px 10px 10px;
-    border: 1px solid #C4C7CF;
-    border-radius: 5px;
-    font-family: 'klee one';
+    padding: 12px;
+    border: 1px solid #B0B3BC;
+    border-radius: 6px;
+    font-family: 'Klee One', sans-serif;
     font-size: 14px;
+    color: #2D3142;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+/* Estilo visual para campos de solo lectura (readonly) */
+input[readonly] {
+    background-color: #C4C7CF;
+    border-color: transparent;
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+/* Ajustes del contenedor y alineación de botones */
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 25px;
+    width: 100%;
+}
+
+.profile-actions-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.btn-save {
+    font-family: 'Klee One', sans-serif;
+    font-size: 14px;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgba(34, 55, 102, 0.85); /* Un tono más sólido y legible */
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+    background-color: rgba(34, 55, 102, 1);
+    transform: translateY(-1px);
+}
+
+/* Botón de cerrar sesión adaptado */
+.btn-logout {
+    background-color: #c62828 !important;
+    width: 100%;
+}
+
+.btn-logout:hover {
+    background-color: #b71c1c !important;
 }
 
 .eye-icon {
     position: absolute;
-    right: 10px;
-    top: 38;
+    right: 12px;
+    top: 38px;
     width: 20px;
     height: 20px;
     cursor: pointer;
@@ -112,119 +163,19 @@ input[type="text"] {
 }
 
 .eye-icon:hover {
-    
     opacity: 1;
-}
-
-
-.btn-save {
-    font-family: 'klee one';
-    font-size: 15px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: rgba(34, 55, 102, 0.68);
-    color: white;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-#boton-Guardar{
-     text-decoration: none;
 }
 
 /* ---------------------- */
 /* 🔹 RESPONSIVE DESIGN  */
 /* ---------------------- */
-
-/* 📱 Tabletas y móviles grandes (pantallas menores a 1024px) */
-@media (max-width: 1024px) {
-    .container {
-        flex-direction: column;
-        text-align: center;
-        gap: 30px;
-    }
-
-    .logo-section img {
-        max-width: 300px; 
-    }
-
-    .login-box {
-        width: 90%;
-        max-width: 400px;
-        padding: 30px;
-    }
-
-    button {
-        font-family:'';
-        max-width: 220px;
-        font-size: 18px;
-        height: 50px;
-    }
-}
-
-/* 📱 Móviles medianos (hasta 768px) */
-@media (max-width: 768px) {
-    .logo-section img {
-        max-width: 250px;
-    }
-
-    .login-box {
-        width: 100%;
-        max-width: 350px;
-        padding: 25px;
-    }
-
-    .login-box h2 {
-        font-size: 1.8rem;
-    }
-
-    .login-box input {
-        padding: 10px;
-        font-size: 0.9rem;
-    }
-
-    button {
-        max-width: 200px;
-        font-size: 16px;
-        height: 45px;
-    }
-}
-
-/* 📟 Dispositivos pequeños (hasta 480px) */
 @media (max-width: 480px) {
-    .container {
-        gap: 20px;
+    .form-container {
+        width: 100%;
+        padding: 20px 15px;
     }
-
-    .logo-section img {
-        max-width: 180px;
-    }
-
-    .login-box {
-        padding: 20px;
-        max-width: 300px;
-    }
-
-    .login-box h2 {
-        font-size: 1.5rem;
-    }
-
-    .login-box input {
-        padding: 8px;
-        font-size: 0.85rem;
-    }
-
-    button {
-        max-width: 180px;
-        font-size: 14px;
-        height: 40px;
-    }
-
-    .forgot-password, .no-cuenta {
-        font-size: 0.9rem;
-    }
-
-    .register-link {
-        font-size: 18px;
+    .profile-actions-row {
+        flex-direction: column;
+        gap: 12px;
     }
 }

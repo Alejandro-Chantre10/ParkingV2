@@ -11,11 +11,9 @@
             display: none;
             position: fixed;
             z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
             justify-content: center;
             align-items: center;
         }
@@ -25,17 +23,10 @@
             border-radius: 16px;
             text-align: center;
             width: 350px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(0,0,0,0.4);
         }
-        .warning-img {
-            width: 50px;
-            margin-bottom: 15px;
-        }
-        .modal-buttons {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
-        }
+        .warning-img { width: 50px; margin-bottom: 15px; }
+        .modal-buttons { display: flex; justify-content: space-around; margin-top: 20px; }
         .btn-delete, .btn-cancel {
             padding: 10px 20px;
             border-radius: 8px;
@@ -43,33 +34,14 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .btn-delete {
-            background-color: #5c6bc0;
-            color: white;
-        }
-        .btn-cancel {
-            background-color: #e0e0e0;
-        }
-        .status-badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .status-PENDING { background-color: #fff3e0; color: #e65100; }
+        .btn-delete { background-color: #5c6bc0; color: white; }
+        .btn-cancel { background-color: #e0e0e0; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .status-PENDING   { background-color: #fff3e0; color: #e65100; }
         .status-CONFIRMED { background-color: #e8f5e9; color: #2e7d32; }
         .status-CANCELLED { background-color: #ffebee; color: #c62828; }
         .status-COMPLETED { background-color: #e3f2fd; color: #1565c0; }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
+        .loading, .empty-state { text-align: center; padding: 40px; color: #666; }
         .create-btn {
             display: inline-block;
             background-color: #5c6bc0;
@@ -79,9 +51,7 @@
             text-decoration: none;
             margin-bottom: 20px;
         }
-        .create-btn:hover {
-            background-color: #3f51b5;
-        }
+        .create-btn:hover { background-color: #3f51b5; }
     </style>
 </head>
 
@@ -95,13 +65,13 @@
             </div>
 
             <div id="loadingState" class="loading">Cargando reservas...</div>
-            
-            <div id="emptyState" class="empty-state" style="display: none;">
+
+            <div id="emptyState" class="empty-state" style="display:none;">
                 <p>No tienes reservas aun</p>
                 <a href="createReservation.html" class="create-btn">Crear tu primera reserva</a>
             </div>
 
-            <table class="reservation-table" id="reservationsTable" style="display: none;">
+            <table class="reservation-table" id="reservationsTable" style="display:none;">
                 <thead>
                     <tr>
                         <th>No.</th>
@@ -114,9 +84,7 @@
                         <th>Accion</th>
                     </tr>
                 </thead>
-                <tbody id="reservationsBody">
-                    <!-- Reservations will be loaded here -->
-                </tbody>
+                <tbody id="reservationsBody"></tbody>
             </table>
         </div>
     </div>
@@ -138,32 +106,31 @@
     <script>
         let reservationToCancel = null;
 
-        // Check authentication and load reservations on page load
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
             await loadReservations();
         });
 
-        // Load user reservations
         async function loadReservations() {
             const loadingDiv = document.getElementById('loadingState');
-            const emptyDiv = document.getElementById('emptyState');
-            const table = document.getElementById('reservationsTable');
-            const tbody = document.getElementById('reservationsBody');
+            const emptyDiv   = document.getElementById('emptyState');
+            const table      = document.getElementById('reservationsTable');
+            const tbody      = document.getElementById('reservationsBody');
 
             try {
                 const result = await ReservationsAPI.getList();
-                
                 loadingDiv.style.display = 'none';
-                
+
                 if (result.success && result.reservations && result.reservations.length > 0) {
                     table.style.display = 'table';
                     tbody.innerHTML = '';
-                    
+
                     result.reservations.forEach((reservation, index) => {
+                        // Schema uses 'id' as primary key
+                        const rid = reservation.id;
                         const row = document.createElement('tr');
-                        row.dataset.id = reservation.id_reservations;
-                        
+                        row.dataset.id = rid;
+
                         row.innerHTML = `
                             <td>${String(index + 1).padStart(3, '0')}</td>
                             <td>${reservation.vehicle_plate}</td>
@@ -174,23 +141,22 @@
                             <td>${formatCurrency(reservation.price)}</td>
                             <td class="actions-cell">
                                 ${reservation.status === 'PENDING' ? `
-                                    <button onclick="payReservation(${reservation.id_reservations}, ${reservation.price})" class="action-btn" title="Pagar">
+                                    <button onclick="payReservation(${rid}, ${reservation.price})" class="action-btn" title="Pagar">
                                         <img src="../images/descarga-de-archivos.png" alt="Pagar" class="icon-img">
                                     </button>
-                                    <button onclick="editReservation(${reservation.id_reservations})" class="action-btn" title="Editar">
+                                    <button onclick="editReservation(${rid})" class="action-btn" title="Editar">
                                         <img src="../images/editar.png" alt="Editar" class="icon-img">
                                     </button>
-                                    <button onclick="showCancelModal(${reservation.id_reservations})" class="action-btn" title="Cancelar">
+                                    <button onclick="showCancelModal(${rid})" class="action-btn" title="Cancelar">
                                         <img src="../images/eliminar.png" alt="Cancelar" class="icon-img">
                                     </button>
                                 ` : reservation.status === 'CONFIRMED' ? `
-                                    <button onclick="showCancelModal(${reservation.id_reservations})" class="action-btn" title="Cancelar">
+                                    <button onclick="showCancelModal(${rid})" class="action-btn" title="Cancelar">
                                         <img src="../images/eliminar.png" alt="Cancelar" class="icon-img">
                                     </button>
                                 ` : '-'}
                             </td>
                         `;
-                        
                         tbody.appendChild(row);
                     });
                 } else {
@@ -202,10 +168,9 @@
             }
         }
 
-        // Get status text in Spanish
         function getStatusText(status) {
             const texts = {
-                'PENDING': 'Pendiente',
+                'PENDING':   'Pendiente',
                 'CONFIRMED': 'Confirmada',
                 'CANCELLED': 'Cancelada',
                 'COMPLETED': 'Completada'
@@ -213,35 +178,28 @@
             return texts[status] || status;
         }
 
-        // Pay reservation
         function payReservation(id, price) {
             window.location.href = `payReservation.html?id=${id}&price=${price}`;
         }
 
-        // Edit reservation
         function editReservation(id) {
             window.location.href = `updateReservation.html?id=${id}`;
         }
 
-        // Show cancel modal
         function showCancelModal(id) {
             reservationToCancel = id;
             document.getElementById('deleteModal').style.display = 'flex';
         }
 
-        // Close modal
         function closeModal() {
             document.getElementById('deleteModal').style.display = 'none';
             reservationToCancel = null;
         }
 
-        // Confirm cancel reservation
         async function confirmCancel() {
             if (!reservationToCancel) return;
-            
             try {
                 const result = await ReservationsAPI.cancel(reservationToCancel);
-                
                 if (result.success) {
                     showNotification('Reserva cancelada exitosamente', 'success');
                     closeModal();

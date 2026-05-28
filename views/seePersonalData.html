@@ -43,54 +43,56 @@
                     <input id="createdAt" type="text" placeholder="Fecha registro" readonly>
                 </div>
 
-                <a href="updatePersonalData.html" class="btn-save" type="button">Editar perfil</a>
-                <a href="updatePassword.html" class="btn-save" type="button">Cambiar contrasena</a>
-                <button class="btn-save" style="background-color: #c62828;" onclick="logout()">Cerrar sesion</button>
+                <div class="profile-actions" style="display: flex; flex-direction: column; gap: 12px; margin-top: 25px; width: 100%;">
+                    <div style="display: flex; gap: 12px; width: 100%;">
+                        <a href="updatePersonalData.html" class="btn-save" type="button" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Editar perfil</a>
+                        <a href="updatePassword.html" class="btn-save" type="button" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">Cambiar contraseña</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    
+
     <script src="../js/sideBar.js"></script>
     <script src="../js/api.js"></script>
     <script>
-        // Load user profile on page load
         document.addEventListener('DOMContentLoaded', async function() {
             if (!requireLogin()) return;
             await loadProfile();
         });
 
-        // Load user profile
         async function loadProfile() {
             try {
                 const result = await UsersAPI.getProfile();
-                
+
                 if (result.success && result.user) {
                     const user = result.user;
-                    
-                    document.getElementById('userName').textContent = user.full_name;
-                    document.getElementById('fullName').value = user.full_name;
-                    document.getElementById('email').value = user.email;
-                    document.getElementById('phone').value = user.phone || 'No registrado';
-                    document.getElementById('role').value = user.role_name || 'Usuario';
-                    document.getElementById('createdAt').value = formatDate(user.created_at);
+                    document.getElementById('userName').textContent  = user.full_name || 'Usuario';
+                    document.getElementById('fullName').value        = user.full_name || '';
+                    document.getElementById('email').value           = user.email     || '';
+                    document.getElementById('phone').value           = user.phone     || 'No registrado';
+                    document.getElementById('role').value            = user.role_name || 'Usuario';
+                    document.getElementById('createdAt').value       = formatDate(user.created_at);
                 } else {
                     showNotification('Error al cargar el perfil', 'error');
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
-                showNotification('Error de conexion', 'error');
+                const user = getCurrentUser();
+                if (user) {
+                    document.getElementById('userName').textContent = user.full_name || 'Usuario';
+                    document.getElementById('fullName').value       = user.full_name || '';
+                    document.getElementById('email').value          = user.email     || '';
+                }
             }
         }
 
-        // Logout function
         async function logout() {
             try {
                 await AuthAPI.logout();
-                clearUserSession();
-                window.location.href = '../inicioSesion.html';
-            } catch (error) {
-                console.error('Error logging out:', error);
-                // Force logout even if API fails
+            } catch (e) {
+                console.error('Logout API error:', e);
+            } finally {
                 clearUserSession();
                 window.location.href = '../inicioSesion.html';
             }
